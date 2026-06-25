@@ -5,61 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도전 100곡 - MC 전용 대시보드</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f1f5f9; margin: 0; padding: 20px; color: #1e293b; }
-        .container { max-width: 1650px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h1 { text-align: center; color: #2563eb; font-size: 32px; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; }
-        .tab-btn { padding: 12px 24px; font-size: 16px; font-weight: bold; border: none; background: #e2e8f0; color: #475569; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f1f5f9; margin: 0; padding: 12px; color: #1e293b; }
+        .container { max-width: 1650px; margin: 0 auto; background: #fff; padding: 16px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h1 { text-align: center; color: #2563eb; font-size: 22px; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; }
+        
+        .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; justify-content: center; }
+        .tab-btn { padding: 10px 16px; font-size: 14px; font-weight: bold; border: none; background: #e2e8f0; color: #475569; border-radius: 8px; cursor: pointer; transition: all 0.2s; flex: 1 1 auto; min-width: 120px; text-align: center; }
         .tab-btn.active { background: #2563eb; color: white; }
-        .round-desc { background: #f8fafc; padding: 15px 20px; border-radius: 10px; margin-bottom: 25px; border-left: 6px solid #2563eb; font-size: 15px; color: #334155; line-height: 1.6; }
-        .song-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; display: none; }
-        .song-grid.active { display: grid; }
-        .song-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .num-badge { background: #f1f5f9; color: #2563eb; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 13px; display: inline-block; }
-        .song-title { font-weight: bold; font-size: 16px; color: #0f172a; margin: 10px 0 5px 0; }
-        .lyrics-box { background: #fafafa; border: 1px solid #e2e8f0; padding: 14px; margin: 12px 0; border-radius: 8px; font-size: 13.5px; white-space: pre-line; line-height: 1.8; color: #1e293b; font-weight: 500; word-break: keep-all; height: auto; max-height: none; overflow: visible; }
-        .btn-group { margin-top: 10px; }
-        button.action-btn { width: 100%; padding: 11px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; color: white; transition: all 0.2s; }
-        .btn-play { background-color: #ef4444; }
-        .btn-play:hover { background-color: #dc2626; }
-        .tips { background: #eff6ff; border: 1px solid #bfdbfe; padding: 15px; border-radius: 8px; margin-top: 30px; font-size: 14px; color: #1e3a8a; line-height: 1.6; }
+
+        .round-desc { background: #f8fafc; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; border-left: 5px solid #2563eb; font-size: 13px; color: #334155; line-height: 1.5; }
+
+        .song-list { display: none; flex-direction: column; gap: 8px; }
+        .song-list.active { display: flex; }
+
+        .song-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
+
+        .song-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .song-header:active { background: #f8fafc; }
+
+        .num-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
+        .song-title { font-weight: bold; font-size: 15px; color: #0f172a; flex: 1; }
+        .toggle-icon { color: #94a3b8; font-size: 18px; flex-shrink: 0; transition: transform 0.25s; }
+        .song-card.open .toggle-icon { transform: rotate(180deg); }
+
+        .song-body { display: none; padding: 0 16px 14px 16px; }
+        .song-card.open .song-body { display: block; }
+
+        .lyrics-box { background: #fafafa; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px; font-size: 13.5px; white-space: pre-line; line-height: 1.9; color: #1e293b; font-weight: 500; word-break: keep-all; margin-bottom: 10px; }
+
+        .btn-play { width: 100%; padding: 11px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; color: white; background-color: #ef4444; transition: background 0.2s; }
+        .btn-play:active { background-color: #dc2626; }
+
+        .tips { background: #eff6ff; border: 1px solid #bfdbfe; padding: 14px; border-radius: 8px; margin-top: 20px; font-size: 13px; color: #1e3a8a; line-height: 1.6; }
+
+        @media (min-width: 768px) {
+            body { padding: 20px; }
+            .container { padding: 28px; }
+            h1 { font-size: 28px; }
+            .tab-btn { font-size: 15px; flex: 0 1 auto; }
+            .song-list { display: none; }
+            .song-list.active { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🎤 도전 100곡 오퍼레이팅 대시보드</h1>
+    <h1>🎤 도전 100곡 대시보드</h1>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="openRound(event, 'r1')">1R. 90 레트로 (1~25)</button>
-        <button class="tab-btn" onclick="openRound(event, 'r2')">2R. 싸이월드 감성 (26~50)</button>
-        <button class="tab-btn" onclick="openRound(event, 'r3')">3R. 주니어 애창곡 (51~75)</button>
-        <button class="tab-btn" onclick="openRound(event, 'r4')">4R. 세대불문 트로트 (76~100)</button>
+        <button class="tab-btn active" onclick="openRound(event, 'r1')">1R. 90 레트로</button>
+        <button class="tab-btn" onclick="openRound(event, 'r2')">2R. 싸이월드</button>
+        <button class="tab-btn" onclick="openRound(event, 'r3')">3R. 주니어 애창</button>
+        <button class="tab-btn" onclick="openRound(event, 'r4')">4R. 트로트</button>
     </div>
 
-    <div id="r1-desc" class="round-desc">
-        <strong>[1라운드] 90년대 레트로 히트곡 (1~25)</strong> / 90년대를 대표하는 국민 명곡 25선입니다.
-    </div>
-    <div id="r2-desc" class="round-desc" style="display:none;">
-        <strong>[2라운드] 2000년대 싸이월드 음악 (26~50)</strong> / 그 시절 미니홈피 감성을 자극하는 2000년대 히트곡 25선입니다.
-    </div>
-    <div id="r3-desc" class="round-desc" style="display:none;">
-        <strong>[3라운드] 2030 주니어 애창곡 (51~75)</strong> / 젊은 직원들이 노래방에서 즐겨 부르는 애창곡 25선입니다.
-    </div>
-    <div id="r4-desc" class="round-desc" style="display:none;">
-        <strong>[4라운드] 세대불문 트로트 (76~100)</strong> / 남녀노소 누구나 함께 흥겹게 부를 수 있는 트로트 25선입니다.
-    </div>
+    <div id="r1-desc" class="round-desc"><strong>[1라운드] 90년대 레트로 히트곡 (1~25)</strong> / 90년대를 대표하는 국민 명곡 25선입니다.</div>
+    <div id="r2-desc" class="round-desc" style="display:none;"><strong>[2라운드] 2000년대 싸이월드 음악 (26~50)</strong> / 그 시절 미니홈피 감성을 자극하는 2000년대 히트곡 25선입니다.</div>
+    <div id="r3-desc" class="round-desc" style="display:none;"><strong>[3라운드] 2030 주니어 애창곡 (51~75)</strong> / 젊은 직원들이 노래방에서 즐겨 부르는 애창곡 25선입니다.</div>
+    <div id="r4-desc" class="round-desc" style="display:none;"><strong>[4라운드] 세대불문 트로트 (76~100)</strong> / 남녀노소 누구나 함께 흥겹게 부를 수 있는 트로트 25선입니다.</div>
 
-    <div id="r1" class="song-grid active"></div>
-    <div id="r2" class="song-grid"></div>
-    <div id="r3" class="song-grid"></div>
-    <div id="r4" class="song-grid"></div>
+    <div id="r1" class="song-list active"></div>
+    <div id="r2" class="song-list"></div>
+    <div id="r3" class="song-list"></div>
+    <div id="r4" class="song-list"></div>
 
     <div class="tips">
-        <strong>💡 MC 및 오퍼레이터 현장 가이드:</strong><br>
-        1. 모든 곡의 가사가 카드에 표시되어 실시간 가창 심사가 가능합니다.<br>
-        2. 유튜브 반주 버튼을 눌러 바로 반주를 재생할 수 있습니다.<br>
-        3. 카드 가로 폭이 넓어 한 문장이 중간에 잘리지 않고 표시됩니다.
+        <strong>💡 사용 방법:</strong><br>
+        곡 번호/제목을 누르면 가사가 펼쳐집니다. 한 번 더 누르면 닫혀요.
     </div>
 </div>
 
@@ -1420,43 +1434,41 @@ oh 화끈해 더 뜨겁게 only you` },
 
     function buildDashboard() {
         songsData.forEach(song => {
-            const gridId = 'r' + song.round;
-            const container = document.getElementById(gridId);
+            const container = document.getElementById('r' + song.round);
             if (!container) return;
-            
+
             const card = document.createElement('div');
             card.className = 'song-card';
-            
+
             const searchKeyword = encodeURIComponent("TJ노래방 " + song.title + " 반주");
-            const lyricsDisplay = song.lyrics ? song.lyrics : '(가사 없음)';
+            const lyricsDisplay = song.lyrics || '(가사 없음)';
 
             card.innerHTML = `
-                <div class="song-info">
-                    <span class="num-badge">No. ${String(song.id).padStart(2, '0')}</span>
-                    <div class="song-title">${song.title}</div>
+                <div class="song-header" onclick="toggleCard(this.parentElement)">
+                    <span class="num-badge">No.${String(song.id).padStart(2,'0')}</span>
+                    <span class="song-title">${song.title}</span>
+                    <span class="toggle-icon">▼</span>
                 </div>
-                <div class="lyrics-box">${lyricsDisplay}</div>
-                <div class="btn-group">
-                    <button class="action-btn btn-play" onclick="window.open('https://www.youtube.com/results?search_query=${searchKeyword}', '_blank')">▶ 유튜브 반주 재생</button>
+                <div class="song-body">
+                    <div class="lyrics-box">${lyricsDisplay}</div>
+                    <button class="btn-play" onclick="window.open('https://www.youtube.com/results?search_query=${searchKeyword}','_blank')">▶ 유튜브 반주 재생</button>
                 </div>
             `;
             container.appendChild(card);
         });
     }
 
-    function openRound(evt, roundId) {
-        const grids = document.getElementsByClassName("song-grid");
-        for (let i = 0; i < grids.length; i++) grids[i].classList.remove("active");
-        
-        const descs = document.getElementsByClassName("round-desc");
-        for (let i = 0; i < descs.length; i++) descs[i].style.display = "none";
-        
-        const tabs = document.getElementsByClassName("tab-btn");
-        for (let i = 0; i < tabs.length; i++) tabs[i].classList.remove("active");
+    function toggleCard(card) {
+        card.classList.toggle('open');
+    }
 
-        document.getElementById(roundId).classList.add("active");
-        document.getElementById(roundId + "-desc").style.display = "block";
-        evt.currentTarget.classList.add("active");
+    function openRound(evt, roundId) {
+        document.querySelectorAll('.song-list').forEach(g => g.classList.remove('active'));
+        document.querySelectorAll('.round-desc').forEach(d => d.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(roundId).classList.add('active');
+        document.getElementById(roundId + '-desc').style.display = 'block';
+        evt.currentTarget.classList.add('active');
     }
 
     window.onload = buildDashboard;
