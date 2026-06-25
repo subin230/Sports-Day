@@ -3,28 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>도전 100곡 - MC 전용 대시보드</title>
+    <title>노래 맞추기 / 도전 100곡</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', sans-serif; background-color: #f1f5f9; margin: 0; padding: 12px; color: #1e293b; }
         .container { max-width: 1650px; margin: 0 auto; background: #fff; padding: 16px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h1 { text-align: center; color: #2563eb; font-size: 22px; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; }
-        
+        h1 { text-align: center; color: #1e293b; font-size: 22px; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; }
+
         .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; justify-content: center; }
         .tab-btn { padding: 10px 16px; font-size: 14px; font-weight: bold; border: none; background: #e2e8f0; color: #475569; border-radius: 8px; cursor: pointer; transition: all 0.2s; flex: 1 1 auto; min-width: 120px; text-align: center; }
-        .tab-btn.active { background: #2563eb; color: white; }
+        .tab-btn.active-yellow { background: #f59e0b; color: white; }
+        .tab-btn.active-blue { background: #2563eb; color: white; }
 
-        .round-desc { background: #f8fafc; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; border-left: 5px solid #2563eb; font-size: 13px; color: #334155; line-height: 1.5; }
+        .round-desc { padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: 13px; color: #334155; line-height: 1.5; }
+        .round-desc.yellow { background: #fffbeb; border-left: 5px solid #f59e0b; }
+        .round-desc.blue { background: #f8fafc; border-left: 5px solid #2563eb; }
 
         .song-list { display: none; flex-direction: column; gap: 8px; }
         .song-list.active { display: flex; }
 
         .song-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
+        .song-card.yellow-card { border-color: #fde68a; }
 
         .song-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
         .song-header:active { background: #f8fafc; }
 
-        .num-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
+        .num-badge { padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
+        .num-badge.yellow { background: #fef3c7; color: #d97706; }
+        .num-badge.blue { background: #eff6ff; color: #2563eb; }
+
         .song-title { font-weight: bold; font-size: 15px; color: #0f172a; flex: 1; }
         .toggle-icon { color: #94a3b8; font-size: 18px; flex-shrink: 0; transition: transform 0.25s; }
         .song-card.open .toggle-icon { transform: rotate(180deg); }
@@ -33,11 +40,15 @@
         .song-card.open .song-body { display: block; }
 
         .lyrics-box { background: #fafafa; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px; font-size: 13.5px; white-space: pre-line; line-height: 1.9; color: #1e293b; font-weight: 500; word-break: keep-all; margin-bottom: 10px; }
+        .lyrics-box.yellow { background: #fffdf0; border-color: #fde68a; }
 
-        .btn-play { width: 100%; padding: 11px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; color: white; background-color: #ef4444; transition: background 0.2s; }
-        .btn-play:active { background-color: #dc2626; }
+        .btn-play { width: 100%; padding: 11px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; color: white; transition: background 0.2s; }
+        .btn-play.yellow { background-color: #f59e0b; }
+        .btn-play.yellow:active { background-color: #d97706; }
+        .btn-play.blue { background-color: #ef4444; }
+        .btn-play.blue:active { background-color: #dc2626; }
 
-        .tips { background: #eff6ff; border: 1px solid #bfdbfe; padding: 14px; border-radius: 8px; margin-top: 20px; font-size: 13px; color: #1e3a8a; line-height: 1.6; }
+        .tips { background: #fffbeb; border: 1px solid #fde68a; padding: 14px; border-radius: 8px; margin-top: 20px; font-size: 13px; color: #92400e; line-height: 1.6; }
 
         @media (min-width: 768px) {
             body { padding: 20px; }
@@ -52,32 +63,150 @@
 <body>
 
 <div class="container">
-    <h1>🎤 도전 100곡 대시보드</h1>
+    <h1>🎵 노래 맞추기 / 도전 100곡</h1>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="openRound(event, 'r1')">1R. 90 레트로</button>
-        <button class="tab-btn" onclick="openRound(event, 'r2')">2R. 싸이월드</button>
-        <button class="tab-btn" onclick="openRound(event, 'r3')">3R. 주니어 애창</button>
-        <button class="tab-btn" onclick="openRound(event, 'r4')">4R. 트로트</button>
+        <button class="tab-btn active-yellow" onclick="openRound(event, 'r0', 'yellow')">0R. 노래 맞추기</button>
+        <button class="tab-btn" onclick="openRound(event, 'r1', 'blue')">1R. 90 레트로</button>
+        <button class="tab-btn" onclick="openRound(event, 'r2', 'blue')">2R. 싸이월드</button>
+        <button class="tab-btn" onclick="openRound(event, 'r3', 'blue')">3R. 주니어 애창</button>
+        <button class="tab-btn" onclick="openRound(event, 'r4', 'blue')">4R. 트로트</button>
     </div>
 
-    <div id="r1-desc" class="round-desc"><strong>[1라운드] 90년대 레트로 히트곡 (1~25)</strong> / 90년대를 대표하는 국민 명곡 25선입니다.</div>
-    <div id="r2-desc" class="round-desc" style="display:none;"><strong>[2라운드] 2000년대 싸이월드 음악 (26~50)</strong> / 그 시절 미니홈피 감성을 자극하는 2000년대 히트곡 25선입니다.</div>
-    <div id="r3-desc" class="round-desc" style="display:none;"><strong>[3라운드] 2030 주니어 애창곡 (51~75)</strong> / 젊은 직원들이 노래방에서 즐겨 부르는 애창곡 25선입니다.</div>
-    <div id="r4-desc" class="round-desc" style="display:none;"><strong>[4라운드] 세대불문 트로트 (76~100)</strong> / 남녀노소 누구나 함께 흥겹게 부를 수 있는 트로트 25선입니다.</div>
+    <div id="r0-desc" class="round-desc yellow"><strong>[0라운드] 노래 맞추기 (1초 맞추기)</strong> / 노래를 듣고 제목을 맞춘 후 다같이 1절 완곡</div>
+    <div id="r1-desc" class="round-desc blue" style="display:none;"><strong>[1라운드] 90년대 레트로 히트곡 (1~25)</strong> / 90년대를 대표하는 국민 명곡 25선입니다.</div>
+    <div id="r2-desc" class="round-desc blue" style="display:none;"><strong>[2라운드] 2000년대 싸이월드 음악 (26~50)</strong> / 그 시절 미니홈피 감성을 자극하는 2000년대 히트곡 25선입니다.</div>
+    <div id="r3-desc" class="round-desc blue" style="display:none;"><strong>[3라운드] 2030 주니어 애창곡 (51~75)</strong> / 젊은 직원들이 노래방에서 즐겨 부르는 애창곡 25선입니다.</div>
+    <div id="r4-desc" class="round-desc blue" style="display:none;"><strong>[4라운드] 세대불문 트로트 (76~100)</strong> / 남녀노소 누구나 함께 흥겹게 부를 수 있는 트로트 25선입니다.</div>
 
-    <div id="r1" class="song-list active"></div>
+    <div id="r0" class="song-list active"></div>
+    <div id="r1" class="song-list"></div>
     <div id="r2" class="song-list"></div>
     <div id="r3" class="song-list"></div>
     <div id="r4" class="song-list"></div>
 
     <div class="tips">
-        <strong>💡 사용 방법:</strong><br>
-        곡 번호/제목을 누르면 가사가 펼쳐집니다. 한 번 더 누르면 닫혀요.
+        <strong>💡 사용 방법:</strong> 곡 번호/제목을 누르면 가사가 펼쳐집니다. 한 번 더 누르면 닫혀요.
     </div>
 </div>
 
 <script>
+    const r0Data = [
+        { id: 1, round: 0, title: "디바 - 왜 불러", lyrics: `왜 불러 왜 불러 왜 불러 왜 아픈날 불러
+왜 불러 왜 불러 왜 아픈날
+두 팔을 벌려 나를 꼬옥 안아줘
+
+저 푸른 바다 밑 파란 물결 속에 떠 다니는 외로움
+누가 날 불러 여기까지 왔는지
+더 이상 나도 날 사랑할 수 조차 없다는 걸 아는데
+뒤에서 나를 부르는건 누구야
+
+다가 오지마 (그럴 순 없어)
+날 내버려둬 (다시 생각해)
+그 누구도 날 진정 사랑해준 사람 없었어
+난 꿈이 없어 (내 손을 잡아봐)
+날 잡은건 너의 실수야 나보다 더 좋은 여잔 얼마든지 있는데` },
+        { id: 2, round: 0, title: "소녀시대 - 키싱유", lyrics: `뚜뚜루 뚜뚜뚜 Kissing you baby 뚜뚜루 뚜뚜뚜 Loving you baby
+
+장난스런 너의 키스에 기분이 좋아 귀엽게 새침한 표정 지어도
+어느 샌가 나는 숙녀처럼 내 입술은 사근사근 그대 이름 부르죠
+
+그대와 발을 맞추며 걷고, 너의 두 손을 잡고, 니 어깨에 기대어 말하고 싶어
+고마워 사랑해 행복만 줄게요 Kissing you oh my love
+내일은 따스한 햇살 속에 너는 내 옆에 누워 사랑의 노래를 불러주며 웃어줘
+달콤한 사랑해 기분 좋은 한마디
+
+뚜뚜루 뚜뚜뚜 Kissing you baby 뚜뚜루 뚜뚜뚜 Loving you baby
+
+눈을 감고 너의 입술에 키스를 하면 내 볼은 핑크빛 물이 들어도
+내 마음은 이미 넘어가고 내 가슴엔 두근두근 심장소리 들리죠` },
+        { id: 3, round: 0, title: "이정현 - 와", lyrics: `사실이 아니길 믿고 싶었어
+널 놓치기 싫었어
+혹시나 우리의 사랑이 잘못돼 끝나면 어떡해 
+가슴은 아프지만 모른척 해야해
+이별보단 덜 아플테니까
+
+
+설마 했던 니가 나를 떠나 버렸어
+깊었던 정을 쉽게 잊을 수 없어 
+늦었어 이미 난 네 여자야
+오오오오 오오오오 독한 여자라 하지마 
+오오오오 오오오오 사랑했으니 책임져` },
+        { id: 4, round: 0, title: "슈퍼주니어 - 쏘리쏘리", lyrics: `Sorry Sorry Sorry Sorry
+내가 내가 내가 먼저
+네게 네게 네게 빠져
+빠져 빠져 버려 baby
+Shawty Shawty Shawty Shawty
+눈이 부셔 부셔 부셔
+숨이 막혀 막혀 막혀
+내가 미쳐 미쳐 baby
+
+바라보는 눈빛 속에
+눈빛 속에 나는 마치
+나는 마치 뭐에 홀린 놈
+이젠 벗어나지도 못해
+걸어오는 너의 모습
+너의 모습 너는 마치
+내 심장을 밟고 왔나봐
+이젠 벗어나지도 못해` },
+        { id: 5, round: 0, title: "원더걸스 - 노바디", lyrics: `I want nobody nobody but you
+I want nobody nobody but you
+난 다른 사람은 싫어 니가 아니면 싫어
+I want nobody nobody nobody nobody
+난 싫은데 왜 날 밀어내
+려고 하니 자꾸 내말은 듣지 않고
+왜 이렇게 다른 남자에게
+날 보내려 하니 어떻게 이러니
+
+날 위해 그렇단 그 말
+넌 부족하다는 그 말
+이젠 그만해 넌 나를 알잖아 왜
+원하지도 않는걸 강요해
+
+I want nobody nobody but you
+I want nobody nobody but you
+난 다른 사람은 싫어 니가 아니면 싫어
+I want nobody nobody nobody nobody` },
+        { id: 6, round: 0, title: "노브레인 - 넌 내게 반했어", lyrics: `넌 내게 반했어
+화려한 조명 속에 빛나고 있는
+넌 내게 반했어
+웃지 말고 대답해봐
+넌 내게 반했어
+뜨거운 토요일 밤의 열기 속에
+넌 내게 반했어
+솔직하게 말을 해봐
+도도한 눈빛으로 제압하려 해도
+난 그런 속임수에 속지 않아 예예
+넌 내게 반했어` },
+        { id: 7, round: 0, title: "듀스 - 여름안에서", lyrics: `언제나 꿈꿔 온 순간이
+여기 지금 내게 시작 되고 있어
+그렇게 너를 사랑했던
+내 마음을 넌 받아 주었어
+
+오 내 기분만큼 밝은 태양과
+시원한 바람들이 내게 다가와
+나는 이렇게 행복을 느껴
+
+하늘은 우릴 향해 열려 있어
+그리고 내 곁에는 니가 있어
+환한 미소와 함께 서 있는
+그래 너는 푸른 바다야
+
+같은 시간 속에 이렇게
+함께 있는 것만으로도 난 좋아
+행복한 미소에 니 얼굴
+나 더 이상 무얼 바라겠니
+
+저 파란 하늘 아래서 너와 나
+여기 이렇게 사랑하고 있어
+나는 이렇게 오! 행복을 느껴
+
+하늘은 우릴 향해 열려 있어
+그리고 내 곁에는 니가 있어
+환한 미소와 함께 서 있는
+그래 너는 푸른 바다야` }
+    ];
+
     const songsData = [
         { id: 1, round: 1, title: "쿨 - 애상", lyrics: `알잖아 너를 이토록 사랑하며 기다린 나를
 뭐가 그리 바쁜지 너무 보기 힘들어 넌 도대체 뭐하고 다니니
@@ -1432,26 +1561,43 @@ oh 화끈해 더 뜨겁게 only you` },
 코웨이 코웨이 렛츠고 사람을 행복하게` }
     ];
 
-    function buildDashboard() {
-        songsData.forEach(song => {
-            const container = document.getElementById('r' + song.round);
-            if (!container) return;
-
+    function buildR0() {
+        const container = document.getElementById('r0');
+        r0Data.forEach(song => {
             const card = document.createElement('div');
-            card.className = 'song-card';
-
+            card.className = 'song-card yellow-card';
             const searchKeyword = encodeURIComponent("TJ노래방 " + song.title + " 반주");
-            const lyricsDisplay = song.lyrics || '(가사 없음)';
-
             card.innerHTML = `
                 <div class="song-header" onclick="toggleCard(this.parentElement)">
-                    <span class="num-badge">No.${String(song.id).padStart(2,'0')}</span>
+                    <span class="num-badge yellow">No.${String(song.id).padStart(2,'0')}</span>
                     <span class="song-title">${song.title}</span>
                     <span class="toggle-icon">▼</span>
                 </div>
                 <div class="song-body">
-                    <div class="lyrics-box">${lyricsDisplay}</div>
-                    <button class="btn-play" onclick="window.open('https://www.youtube.com/results?search_query=${searchKeyword}','_blank')">▶ 유튜브 반주 재생</button>
+                    <div class="lyrics-box yellow">${song.lyrics || '(가사 없음)'}</div>
+                    <button class="btn-play yellow" onclick="window.open('https://www.youtube.com/results?search_query=${searchKeyword}','_blank')">▶ 유튜브 반주 재생</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function buildDashboard() {
+        songsData.forEach(song => {
+            const container = document.getElementById('r' + song.round);
+            if (!container) return;
+            const card = document.createElement('div');
+            card.className = 'song-card';
+            const searchKeyword = encodeURIComponent("TJ노래방 " + song.title + " 반주");
+            card.innerHTML = `
+                <div class="song-header" onclick="toggleCard(this.parentElement)">
+                    <span class="num-badge blue">No.${String(song.id).padStart(2,'0')}</span>
+                    <span class="song-title">${song.title}</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="song-body">
+                    <div class="lyrics-box">${song.lyrics || '(가사 없음)'}</div>
+                    <button class="btn-play blue" onclick="window.open('https://www.youtube.com/results?search_query=${searchKeyword}','_blank')">▶ 유튜브 반주 재생</button>
                 </div>
             `;
             container.appendChild(card);
@@ -1462,16 +1608,22 @@ oh 화끈해 더 뜨겁게 only you` },
         card.classList.toggle('open');
     }
 
-    function openRound(evt, roundId) {
+    function openRound(evt, roundId, color) {
         document.querySelectorAll('.song-list').forEach(g => g.classList.remove('active'));
         document.querySelectorAll('.round-desc').forEach(d => d.style.display = 'none');
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.remove('active-yellow');
+            b.classList.remove('active-blue');
+        });
         document.getElementById(roundId).classList.add('active');
         document.getElementById(roundId + '-desc').style.display = 'block';
-        evt.currentTarget.classList.add('active');
+        evt.currentTarget.classList.add('active-' + color);
     }
 
-    window.onload = buildDashboard;
+    window.onload = function() {
+        buildR0();
+        buildDashboard();
+    };
 </script>
 
 </body>
